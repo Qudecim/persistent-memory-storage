@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"qudecim/db/appConfig"
 	"qudecim/db/db"
 )
@@ -11,7 +10,6 @@ import (
 // expired_time
 
 func main() {
-
 	config, err := appConfig.LoadConfig("config.yaml")
 	if err != nil {
 		return
@@ -23,14 +21,7 @@ func main() {
 	// 	db.Set("test_key"+strconv.Itoa(i), "test_value"+strconv.Itoa(i))
 	// }
 
-	k, ok := db.Get("test_key99")
-	fmt.Println(k, ok)
-
-	k, ok = db.Get("test_key199")
-	fmt.Println(k, ok)
-
-	k, ok = db.Get("test_key299")
-	fmt.Println(k, ok)
+	//profile()
 
 	db.Snapshot()
 

@@ -8,7 +8,6 @@ import (
 
 type Config struct {
 	Binlog struct {
-		Delimiter           string `yaml:"delimiter"`
 		Directory           string `yaml:"directory"`
 		Oversize            int64  `yaml:"oversize"`
 		EveryCheckOversize  bool   `yaml:"every_check_oversize"`
@@ -16,7 +15,6 @@ type Config struct {
 	} `yaml:"binlog"`
 	Snapshot struct {
 		Directory string `yaml:"directory"`
-		Delimiter string `yaml:"delimiter"`
 	} `yaml:"snapshot"`
 }
 

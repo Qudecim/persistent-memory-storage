@@ -1,6 +1,7 @@
 package db
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 )
@@ -13,6 +14,7 @@ func saveSnapshot() error {
 	snapshot := timestamp()
 	f, err := os.OpenFile(getSnapshotPath(snapshot), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
+		fmt.Println(err)
 		return err
 	}
 
@@ -22,9 +24,10 @@ func saveSnapshot() error {
 		key = escapeString(key)
 		value = escapeString(value)
 
-		text := key + Config.Snapshot.Delimiter + value + Config.Snapshot.Delimiter
+		text := key + "\n" + value + "\n"
 
 		if _, err := f.WriteString(text); err != nil {
+			fmt.Println(err)
 			return err
 		}
 	}

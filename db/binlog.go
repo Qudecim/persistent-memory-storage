@@ -31,7 +31,7 @@ func addToBinlog(key string, value string) error {
 	key = escapeString(key)
 	value = escapeString(value)
 
-	text := key + Config.Binlog.Delimiter + value + Config.Binlog.Delimiter
+	text := key + "\n" + value + "\n"
 
 	if _, err := CurrentBinlogSource.WriteString(text); err != nil {
 		return err
