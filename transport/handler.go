@@ -14,10 +14,6 @@ type Request struct {
 }
 
 type Response struct {
-	Items []ResponseItem `json:"i"`
-}
-
-type ResponseItem struct {
 	Id    string `json:"i"`
 	Value string `json:"v"`
 	Error int    `json:"e"`
@@ -38,19 +34,12 @@ func handle(message []byte) []byte {
 	switch request.Method {
 	case "g": // get
 		data, _ := db.Get(request.Key)
-		responseItem := ResponseItem{Id: request.Id, Value: data}
-		r := []ResponseItem{responseItem}
-		response = Response{Items: r}
+		response = Response{Id: request.Id, Value: data}
 	case "s": // set
 		db.Set(request.Key, request.Value)
-		responseItem := ResponseItem{Id: request.Id}
-		r := []ResponseItem{responseItem}
-		response = Response{Items: r}
+		response = Response{Id: request.Id}
 	default:
-		responseItem := ResponseItem{Id: request.Id, Error: 1}
-		r := []ResponseItem{responseItem}
-		response = Response{Items: r}
-
+		response = Response{Id: request.Id, Error: 1}
 	}
 
 	responseJson, err := json.Marshal(response)
