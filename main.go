@@ -8,6 +8,7 @@ import (
 )
 
 // TODO:
+// uncouncourent db
 // expired_time
 // logs and errors
 

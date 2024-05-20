@@ -51,7 +51,7 @@ func Init(appConfig *appConfig.Config) {
 
 func Set(key string, value string) {
 	Data[key] = value
-	addToBinlog(key, value)
+	//addToBinlog(key, value)
 }
 
 func Get(key string) (string, bool) {

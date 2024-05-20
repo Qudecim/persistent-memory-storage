@@ -53,7 +53,10 @@ func (c *Client) readPump() {
 			break
 		}
 
-		c.send <- handle(message)
+		responseText, sendAnswer := handle(message)
+		if sendAnswer {
+			c.send <- responseText
+		}
 	}
 }
 

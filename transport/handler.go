@@ -19,7 +19,7 @@ type Response struct {
 	Error int    `json:"e"`
 }
 
-func handle(message []byte) []byte {
+func handle(message []byte) ([]byte, bool) {
 
 	jsonData := []byte(message)
 
@@ -30,16 +30,15 @@ func handle(message []byte) []byte {
 	}
 
 	var response Response
+	var sendAnswer bool
 
 	switch request.Method {
 	case "g": // get
 		data, _ := db.Get(request.Key)
 		response = Response{Id: request.Id, Value: data}
+		sendAnswer = true
 	case "s": // set
 		db.Set(request.Key, request.Value)
-		response = Response{Id: request.Id}
-	default:
-		response = Response{Id: request.Id, Error: 1}
 	}
 
 	responseJson, err := json.Marshal(response)
@@ -47,5 +46,5 @@ func handle(message []byte) []byte {
 		log.Fatalf("Error encoding JSON: %v", err)
 	}
 
-	return responseJson
+	return responseJson, sendAnswer
 }
