@@ -1,15 +1,20 @@
 package main
 
 import (
+	"flag"
 	"qudecim/db/appConfig"
 	"qudecim/db/db"
+	socket "qudecim/db/transport"
 )
 
 // TODO:
-// socket
 // expired_time
+// logs and errors
 
 func main() {
+
+	flagProfile := flag.Bool("profile", false, "Is profile action")
+
 	config, err := appConfig.LoadConfig("config.yaml")
 	if err != nil {
 		return
@@ -17,12 +22,11 @@ func main() {
 
 	db.Init(config)
 
-	// for i := 200; i < 300; i++ {
-	// 	db.Set("test_key"+strconv.Itoa(i), "test_value"+strconv.Itoa(i))
-	// }
+	socket.Run()
 
-	//profile()
+	if *flagProfile {
+		profile()
+	}
 
-	db.Snapshot()
-
+	//db.Snapshot()
 }
