@@ -4,14 +4,19 @@ import (
 	"fmt"
 	"os"
 	"qudecim/db/appConfig"
+	"qudecim/db/dto"
 	"strconv"
+	"sync"
 )
 
 var Data map[string]string
-var CurrentBinlog string
-var CurrentBinlogSource *os.File
+
+var GlobalBinlog *Binlog
 
 var Config *appConfig.Config
+
+var rw sync.RWMutex
+var Wg sync.WaitGroup
 
 func Init(appConfig *appConfig.Config) {
 	Data = make(map[string]string)
@@ -41,21 +46,20 @@ func Init(appConfig *appConfig.Config) {
 		readBinlog(strconv.Itoa(binlog))
 		lastbinlog = max(lastbinlog, binlog)
 	}
-
-	if lastbinlog > 0 {
-		changeBinlog(strconv.Itoa(lastbinlog))
-	} else {
-		changeBinlog(timestamp())
-	}
 }
 
-func Set(key string, value string) {
-	Data[key] = value
-	//addToBinlog(key, value)
+func Set(request *dto.Request) {
+	rw.Lock()
+	Data[request.GetKey()] = request.GetValue()
+	rw.Unlock()
+
+	GlobalBinlog.add(request)
 }
 
-func Get(key string) (string, bool) {
-	value, ok := Data[key]
+func Get(request *dto.Request) (string, bool) {
+	rw.RLock()
+	value, ok := Data[request.GetKey()]
+	rw.RUnlock()
 	return value, ok
 }
 

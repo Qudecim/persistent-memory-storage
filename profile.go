@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"qudecim/db/db"
 	"runtime/pprof"
-	"strconv"
 )
 
 func profile() {
@@ -22,7 +20,7 @@ func profile() {
 	}
 	defer pprof.StopCPUProfile()
 
-	for i := 0; i < 1000000; i++ {
-		db.Set("test_key"+strconv.Itoa(i), "value"+strconv.Itoa(i))
+	for i := 0; i < 100; i++ {
+		// db.Set("test_key"+strconv.Itoa(i), "value"+strconv.Itoa(i))
 	}
 }

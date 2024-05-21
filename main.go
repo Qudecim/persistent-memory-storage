@@ -8,9 +8,9 @@ import (
 )
 
 // TODO:
-// uncouncourent db
 // expired_time
 // logs and errors
+// beauty
 
 func main() {
 
@@ -22,6 +22,10 @@ func main() {
 	}
 
 	db.Init(config)
+
+	binlog := db.NewBinlog(config.Binlog.Directory, config.Binlog.EveryCheckOversize, config.Binlog.ChanceCheckOversize)
+	go binlog.Run()
+	db.GlobalBinlog = binlog
 
 	socket.Run()
 

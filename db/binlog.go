@@ -3,51 +3,104 @@ package db
 import (
 	"log"
 	"os"
+	"qudecim/db/dto"
 	"strconv"
 )
 
-func openBinlog() error {
+type Binlog struct {
+	stack chan *dto.Request
 
-	if CurrentBinlogSource != nil {
-		CurrentBinlogSource.Close()
+	directory           string
+	current             string
+	everyCheckOversize  bool
+	chanceCheckOversize int
+	currentSource       *os.File
+}
+
+func NewBinlog(directory string, everyCheckOversize bool, chanceCheckOversize int) *Binlog {
+	return &Binlog{directory: directory, current: timestamp(), everyCheckOversize: everyCheckOversize, chanceCheckOversize: chanceCheckOversize, stack: make(chan *dto.Request)}
+}
+
+func (b *Binlog) Run() {
+	b.openBinlog()
+
+	for {
+		select {
+		case item := <-b.stack:
+			b.addToBinlog(item)
+		}
+	}
+}
+
+func (b *Binlog) add(request *dto.Request) {
+	b.stack <- request
+}
+
+func (b *Binlog) openBinlog() error {
+
+	if b.currentSource != nil {
+		b.currentSource.Close()
 	}
 
-	f, err := os.OpenFile(getCurrentBinlogPath(), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	f, err := os.OpenFile(b.getCurrentBinlogPath(), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return err
 	}
-	CurrentBinlogSource = f
+	b.currentSource = f
+
 	return nil
 }
 
-func addToBinlog(key string, value string) error {
+func (b *Binlog) addToBinlog(request *dto.Request) error {
 
-	if Config.Binlog.EveryCheckOversize || randomInThouthand(Config.Binlog.ChanceCheckOversize) {
-		if isOverSizeBinlog() {
-			changeBinlog(timestamp())
+	if b.everyCheckOversize || randomInThouthand(b.chanceCheckOversize) {
+		if b.isOverSizeBinlog() {
+			b.changeBinlog(timestamp())
 		}
 	}
 
-	key = escapeString(key)
-	value = escapeString(value)
+	key := escapeString(request.GetKey())
+	value := escapeString(request.GetValue())
 
 	text := key + "\n" + value + "\n"
 
-	if _, err := CurrentBinlogSource.WriteString(text); err != nil {
+	if _, err := b.currentSource.WriteString(text); err != nil {
 		return err
 	}
 
 	return nil
 }
 
+func (b *Binlog) changeBinlog(timestampBinlog string) {
+	b.current = timestampBinlog
+	b.openBinlog()
+}
+
+func (b *Binlog) getCurrentBinlogPath() string {
+	return b.getBinlogPath(b.current)
+}
+
+func (b *Binlog) getBinlogPath(binlog string) string {
+	return b.directory + binlog
+}
+
+func (b *Binlog) isOverSizeBinlog() bool {
+	fileInfo, err := os.Stat(b.getCurrentBinlogPath())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fileSize := fileInfo.Size()
+	return fileSize > int64(Config.Binlog.Oversize)
+}
+
 func readBinlog(binlog string) error {
-	f, err := os.Open(getBinlogPath(binlog))
+	f, err := os.Open(Config.Binlog.Directory + binlog)
 	if err != nil {
 		return err
 	}
-	CurrentBinlogSource = f
 
-	return readFromFile(CurrentBinlogSource)
+	return readFromFile(f)
 }
 
 func getBinlogs(fromDate int) []int {
@@ -68,27 +121,4 @@ func getBinlogs(fromDate int) []int {
 	}
 
 	return binlogs
-}
-
-func changeBinlog(timestampBinlog string) {
-	CurrentBinlog = timestampBinlog
-	openBinlog()
-}
-
-func getCurrentBinlogPath() string {
-	return getBinlogPath(CurrentBinlog)
-}
-
-func getBinlogPath(binlog string) string {
-	return Config.Binlog.Directory + binlog
-}
-
-func isOverSizeBinlog() bool {
-	fileInfo, err := os.Stat(getCurrentBinlogPath())
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	fileSize := fileInfo.Size()
-	return fileSize > int64(Config.Binlog.Oversize)
 }

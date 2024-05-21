@@ -3,6 +3,7 @@ package socket
 import (
 	"log"
 	"net/http"
+	"qudecim/db/db"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -38,12 +39,14 @@ type Client struct {
 
 func (c *Client) readPump() {
 	defer func() {
+		db.Wg.Done()
 		c.hub.unregister <- c
 		c.conn.Close()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	db.Wg.Add(1)
 	for {
 		_, message, err := c.conn.ReadMessage()
 		if err != nil {
