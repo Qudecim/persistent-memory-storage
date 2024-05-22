@@ -4,6 +4,7 @@ import (
 	"flag"
 	"qudecim/db/appConfig"
 	"qudecim/db/db"
+	"qudecim/db/internal/binlog"
 	socket "qudecim/db/transport"
 )
 
@@ -11,6 +12,7 @@ import (
 // expired_time
 // logs and errors
 // beauty
+// snapshot to internal
 
 func main() {
 
@@ -21,9 +23,19 @@ func main() {
 		return
 	}
 
+	binlogReader := binlog.NewBinlogReader(config.Binlog.Directory, 100)
+	binlogReader.Init()
+	for binlogReader.Next() {
+		// set to db
+	}
+
+	if err := binlogReader.Err(); err != nil {
+		return
+	}
+
 	db.Init(config)
 
-	binlog := db.NewBinlog(config.Binlog.Directory, config.Binlog.EveryCheckOversize, config.Binlog.ChanceCheckOversize)
+	binlog := binlog.NewBinlogWriter(config.Binlog.Directory, 100)
 	go binlog.Run()
 	db.GlobalBinlog = binlog
 

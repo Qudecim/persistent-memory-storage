@@ -5,13 +5,14 @@ import (
 	"os"
 	"qudecim/db/appConfig"
 	"qudecim/db/dto"
+	"qudecim/db/internal/binlog"
 	"strconv"
 	"sync"
 )
 
 var Data map[string]string
 
-var GlobalBinlog *Binlog
+var GlobalBinlog *binlog.BinlogWriter
 
 var Config *appConfig.Config
 
@@ -40,12 +41,6 @@ func Init(appConfig *appConfig.Config) {
 		readSnapshot(strconv.Itoa(lastSnapshot))
 	}
 
-	binlogs := getBinlogs(lastSnapshot)
-	lastbinlog := 0
-	for _, binlog := range binlogs {
-		readBinlog(strconv.Itoa(binlog))
-		lastbinlog = max(lastbinlog, binlog)
-	}
 }
 
 func Set(request *dto.Request) {
@@ -53,7 +48,7 @@ func Set(request *dto.Request) {
 	Data[request.GetKey()] = request.GetValue()
 	rw.Unlock()
 
-	GlobalBinlog.add(request)
+	GlobalBinlog.Add(request)
 }
 
 func Get(request *dto.Request) (string, bool) {
