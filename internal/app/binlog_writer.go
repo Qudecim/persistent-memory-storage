@@ -1,9 +1,8 @@
-package binlog
+package app
 
 import (
 	"os"
 	"qudecim/db/dto"
-	"qudecim/db/internal/helper.go"
 	"strings"
 )
 
@@ -21,7 +20,7 @@ type BinlogWriter struct {
 func NewBinlogWriter(directory string, maxWrites int) *BinlogWriter {
 	return &BinlogWriter{
 		directory: directory,
-		current:   helper.Timestamp(),
+		current:   Timestamp(),
 		stack:     make(chan *dto.Request),
 		maxWrites: maxWrites,
 	}
@@ -37,7 +36,7 @@ func (b *BinlogWriter) Run() {
 
 			b.writes++
 			if b.writes > b.maxWrites {
-				b.changeBinlog(helper.Timestamp())
+				b.changeBinlog(Timestamp())
 				b.writes = 0
 			}
 

@@ -8,10 +8,8 @@ import (
 
 type Config struct {
 	Binlog struct {
-		Directory           string `yaml:"directory"`
-		Oversize            int64  `yaml:"oversize"`
-		EveryCheckOversize  bool   `yaml:"every_check_oversize"`
-		ChanceCheckOversize int    `yaml:"chance_check_oversize"`
+		Directory string `yaml:"directory"`
+		MaxWrites int    `yaml:"max_writes"`
 	} `yaml:"binlog"`
 	Snapshot struct {
 		Directory string `yaml:"directory"`

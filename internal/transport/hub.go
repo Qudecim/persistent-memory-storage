@@ -1,4 +1,6 @@
-package socket
+package transport
+
+import "qudecim/db/internal/app"
 
 type Hub struct {
 	clients map[*Client]bool
@@ -6,13 +8,16 @@ type Hub struct {
 	register chan *Client
 
 	unregister chan *Client
+
+	app *app.App
 }
 
-func newHub() *Hub {
+func newHub(app *app.App) *Hub {
 	return &Hub{
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
+		app:        app,
 	}
 }
 

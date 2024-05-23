@@ -1,7 +1,5 @@
 binlog:
  directory: binlogs/
- oversize: 1048576 #1mb
- every_check_oversize: y 
- chance_check_oversize: 1 #from 1000
+ max_writes: 1000
 snapshot:
  directory: snapshots/

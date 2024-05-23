@@ -1,13 +1,13 @@
-package socket
+package transport
 
 import (
 	"encoding/json"
 	"log"
-	"qudecim/db/db"
 	"qudecim/db/dto"
+	"qudecim/db/internal/app"
 )
 
-func handle(message []byte) ([]byte, bool) {
+func handle(app *app.App, message []byte) ([]byte, bool) {
 
 	jsonData := []byte(message)
 
@@ -22,11 +22,11 @@ func handle(message []byte) ([]byte, bool) {
 
 	switch request.Method {
 	case "g": // get
-		data, _ := db.Get(&request)
+		data, _ := app.Get(&request)
 		response = dto.Response{Id: request.Id, Value: data}
 		sendAnswer = true
 	case "s": // set
-		db.Set(&request)
+		app.Set(&request)
 	}
 
 	responseJson, err := json.Marshal(response)
