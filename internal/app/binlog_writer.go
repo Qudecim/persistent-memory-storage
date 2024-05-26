@@ -2,7 +2,7 @@ package app
 
 import (
 	"os"
-	"qudecim/db/dto"
+	"qudecim/db/internal/dto"
 	"strings"
 )
 

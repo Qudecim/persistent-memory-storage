@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"os"
 	"qudecim/db/appConfig"
-	"qudecim/db/dto"
+	"qudecim/db/internal/dto"
 	"sync"
 )
 
 type App struct {
-	data   map[string]string
+	data   map[string]Item
 	binlog *BinlogWriter
 	config *appConfig.Config
 
@@ -19,7 +19,7 @@ type App struct {
 
 func NewApp(binlog *BinlogWriter, config *appConfig.Config) *App {
 	return &App{
-		data:   make(map[string]string),
+		data:   make(map[string]Item),
 		binlog: binlog,
 		config: config,
 	}
@@ -41,7 +41,7 @@ func (a *App) Init() {
 
 func (a *App) Set(request *dto.Request) {
 	a.rw.Lock()
-	a.data[request.GetKey()] = request.GetValue()
+	a.data[request.GetKey()] = newItem(request.GetKey(), request.GetValue())
 	a.rw.Unlock()
 
 	a.binlog.Add(request)
@@ -51,9 +51,9 @@ func (a *App) Get(request *dto.Request) (string, bool) {
 	a.rw.RLock()
 	value, ok := a.data[request.GetKey()]
 	a.rw.RUnlock()
-	return value, ok
+	return value.getValue(), ok
 }
 
 func (a *App) ForceSet(key string, value string) {
-	a.data[key] = value
+	a.data[key] = newItem(key, value)
 }

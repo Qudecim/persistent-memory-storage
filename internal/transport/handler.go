@@ -3,8 +3,8 @@ package transport
 import (
 	"encoding/json"
 	"log"
-	"qudecim/db/dto"
 	"qudecim/db/internal/app"
+	"qudecim/db/internal/dto"
 )
 
 func handle(app *app.App, message []byte) ([]byte, bool) {
