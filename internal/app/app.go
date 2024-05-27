@@ -54,6 +54,23 @@ func (a *App) Get(request *dto.Request) (string, bool) {
 	return value.getValue(), ok
 }
 
+func (a *App) Push(request *dto.Request) bool {
+	a.rw.Lock()
+	value, ok := a.data[request.GetKey()]
+	if ok {
+		valueItem, ok := a.data[request.GetValue()]
+		if ok {
+			value.items[request.GetValue()] = &valueItem
+		}
+	}
+	a.rw.Unlock()
+
+	if ok {
+		a.binlog.Add(request) // TODO IT
+	}
+	return ok
+}
+
 func (a *App) ForceSet(key string, value string) {
 	a.data[key] = newItem(key, value)
 }
