@@ -71,6 +71,21 @@ func (a *App) Push(request *dto.Request) bool {
 	return ok
 }
 
+func (a *App) Pull(request *dto.Request) ([]string, bool) {
+	var items []string
+
+	a.rw.Lock()
+	value, ok := a.data[request.GetKey()]
+	if ok {
+		for _, item := range value.items {
+			items = append(items, item.getValue())
+		}
+	}
+	a.rw.Unlock()
+
+	return items, ok
+}
+
 func (a *App) ForceSet(key string, value string) {
 	a.data[key] = newItem(key, value)
 }
