@@ -70,7 +70,6 @@ func (a *App) Push(request *dto.Request) bool {
 	if ok {
 		parent.items[request.GetValue()] = valueItem
 	}
-	fmt.Println(a.data)
 	a.rw.Unlock()
 
 	if ok {
