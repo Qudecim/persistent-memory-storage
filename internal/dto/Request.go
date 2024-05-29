@@ -7,6 +7,10 @@ type Request struct {
 	Value  string `json:"v"`
 }
 
+func (r Request) GetMethod() string {
+	return r.Method
+}
+
 func (r Request) GetKey() string {
 	return r.Key
 }

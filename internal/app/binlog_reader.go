@@ -59,14 +59,28 @@ func (b *BinlogReader) getBinlogs(fromDate int) []int {
 func (b *BinlogReader) readFromFile(file *os.File) error {
 	scanner := bufio.NewScanner(file)
 
+	step := 0
+	method := ""
 	key := ""
 	for scanner.Scan() {
-		if key == "" {
-			key = deescapeString(scanner.Text())
-		} else {
-			b.app.ForceSet(key, deescapeString(scanner.Text()))
-			key = ""
+		text := deescapeString(scanner.Text())
+		switch step {
+		case 0:
+			method = text
+		case 1:
+			key = text
+		case 2:
+			if method == "s" {
+				b.app.ForceSet(key, text)
+			}
+			if method == "p" {
+				b.app.ForcePush(key, text)
+			}
+
+			step = 0
 		}
+
+		step++
 	}
 
 	if err := scanner.Err(); err != nil {

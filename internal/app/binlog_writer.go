@@ -64,10 +64,12 @@ func (b *BinlogWriter) openBinlog() error {
 }
 
 func (b *BinlogWriter) addToBinlog(request *dto.Request) error {
+
+	method := strings.ReplaceAll(request.GetMethod(), "\n", "\\n")
 	key := strings.ReplaceAll(request.GetKey(), "\n", "\\n")
 	value := strings.ReplaceAll(request.GetValue(), "\n", "\\n")
 
-	text := key + "\n" + value + "\n"
+	text := method + "\n" + key + "\n" + value + "\n"
 
 	if _, err := b.currentSource.WriteString(text); err != nil {
 		return err
