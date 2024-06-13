@@ -77,16 +77,19 @@ func (b *BinlogReader) readFromFile(file *os.File) error {
 				b.app.ForcePush(key, text)
 			}
 			if method == "i" {
-				b.app.ForceSet(key, text)
+				b.app.ForceIncrement(key)
 			}
 			if method == "d" {
-				b.app.ForceSet(key, text)
+				b.app.ForceDecrement(key)
 			}
 
-			step = 0
 		}
 
-		step++
+		if step == 2 {
+			step = 0
+		} else {
+			step++
+		}
 	}
 
 	if err := scanner.Err(); err != nil {

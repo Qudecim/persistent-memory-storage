@@ -99,7 +99,8 @@ func (a *App) Increment(request *dto.Request) (int64, bool) {
 	if exist {
 		item.increment()
 	} else {
-		a.data[request.GetKey()] = newIncrement(request.GetKey())
+		item = newIncrement(request.GetKey())
+		a.data[request.GetKey()] = item
 	}
 	a.rw.Unlock()
 
@@ -113,7 +114,8 @@ func (a *App) Decrement(request *dto.Request) (int64, bool) {
 	if exist {
 		item.decrement()
 	} else {
-		a.data[request.GetKey()] = newIncrement(request.GetKey())
+		item = newIncrement(request.GetKey())
+		a.data[request.GetKey()] = item
 	}
 	a.rw.Unlock()
 
