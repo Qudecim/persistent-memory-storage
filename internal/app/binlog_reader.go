@@ -76,6 +76,12 @@ func (b *BinlogReader) readFromFile(file *os.File) error {
 			if method == "p" {
 				b.app.ForcePush(key, text)
 			}
+			if method == "i" {
+				b.app.ForceSet(key, text)
+			}
+			if method == "d" {
+				b.app.ForceSet(key, text)
+			}
 
 			step = 0
 		}

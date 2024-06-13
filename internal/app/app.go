@@ -93,8 +93,41 @@ func (a *App) Pull(request *dto.Request) ([]string, bool) {
 	return items, ok
 }
 
+func (a *App) Increment(request *dto.Request) (int64, bool) {
+	a.rw.Lock()
+	item, exist := a.data[request.GetKey()]
+	if exist {
+		item.increment()
+	} else {
+		a.data[request.GetKey()] = newIncrement(request.GetKey())
+	}
+	a.rw.Unlock()
+
+	a.binlog.Add(request)
+	return item.getIncrement(), true
+}
+
+func (a *App) Decrement(request *dto.Request) (int64, bool) {
+	a.rw.Lock()
+	item, exist := a.data[request.GetKey()]
+	if exist {
+		item.decrement()
+	} else {
+		a.data[request.GetKey()] = newIncrement(request.GetKey())
+	}
+	a.rw.Unlock()
+
+	a.binlog.Add(request)
+	return item.getIncrement(), true
+}
+
 func (a *App) ForceSet(key string, value string) {
-	a.data[key] = newItem(key, value)
+	item, exist := a.data[key]
+	if exist {
+		item.setValue(value)
+	} else {
+		a.data[key] = newItem(key, value)
+	}
 }
 
 func (a *App) ForcePush(key string, value string) {
@@ -106,5 +139,23 @@ func (a *App) ForcePush(key string, value string) {
 	valueItem, ok := a.data[value]
 	if ok {
 		parent.items[value] = valueItem
+	}
+}
+
+func (a *App) ForceIncrement(key string) {
+	item, exist := a.data[key]
+	if exist {
+		item.increment()
+	} else {
+		a.data[key] = newIncrement(key)
+	}
+}
+
+func (a *App) ForceDecrement(key string) {
+	item, exist := a.data[key]
+	if exist {
+		item.decrement()
+	} else {
+		a.data[key] = newIncrement(key)
 	}
 }

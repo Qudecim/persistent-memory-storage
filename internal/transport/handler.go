@@ -37,6 +37,14 @@ func handle(app *app.App, message []byte) ([]byte, bool) {
 		app.Push(&request)
 		response = dto.NewResponse(request.Id, "", 1)
 		sendAnswer = true
+	case "i": // increment
+		data, _ := app.Increment(&request)
+		response = dto.NewResponseIncrement(request.Id, data, 0)
+		sendAnswer = true
+	case "d": // decrement
+		data, _ := app.Decrement(&request)
+		response = dto.NewResponseIncrement(request.Id, data, 0)
+		sendAnswer = true
 	}
 
 	responseJson, err := json.Marshal(response)
